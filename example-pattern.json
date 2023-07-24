@@ -1,0 +1,71 @@
+{
+  "title": "A CloudFormation pattern to setup SNS and Slack/Teams intergration",
+  "description": "A CloudFormation pattern to setup services to enable SNS and Slack/Teams integration",
+  "language": "Node.JS",
+  "level": "200",
+  "framework": "CloudFormation",
+  "introBox": {
+    "headline": "How it works",
+    "text": [
+      "This sample pattern demonstrates how to use AWS SNS and Lambda function to deliver notifications to your slack channels.",
+      "This pattern uses AWS CloudFormation to setup the AWS serverless services and provides you with a setup ready to be integrated with your Slack/Teams channel",
+      "This pattern deploys one SNS topic and one Lambda function"
+    ]
+  },
+  "gitHub": {
+    "template": {
+      "repoURL": "https://github.com/ajayv-AWS/serverless_pattern_cloudFormation",
+      "templateURL": "https://serverlessland.com/repos/sns-slack-teams-cloudFormation-python",
+      "projectFolder": "serverless_pattern_cloudFormation",
+      "templateFile": "serverless_pattern_cloudFormation/SNS-Slck-Teams-integration-cfn.yaml"
+    }
+  },
+  "resources": {
+    "bullets": [
+      {
+        "text": "Introduction to CloudFormation"
+        "link": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html"
+      }
+      ,
+      {
+        "text": "Setup SNS topic",
+        "link": "https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html"
+      },
+      {
+        "text": "Create Lambda function",
+        "link": "https://docs.aws.amazon.com/lambda/latest/dg/getting-started.html"
+      },{
+        "text": "Add lambda function as subscriber to a SNS topic",
+        "link": "https://docs.aws.amazon.com/sns/latest/dg/lambda-console.html"
+      },
+      {
+        "text": "Add your slack/MS teams and channel configuration to the Lambda function",
+        "link": "https://repost.aws/knowledge-center/sns-lambda-webhooks-chime-slack-teams"
+      }
+    ]
+  },
+  "deploy": {
+    "text": [
+      "aws cloudformation create-stack --stack-name myteststack --template-body file://SNS-Slck-Teams-integration-cfn.yaml"
+    ]
+  },
+  "testing": {
+    "text": [
+      "Send a message to SNS:",
+      "aws sns publish --topic-arn ENTER_YOUR_SNS_TOPIC_ARN --subject testSubject --message testMessage",
+    ]
+  },
+  "cleanup": {
+    "text": [
+      "aws cloudformation delete-stack --stack-name stackName"
+    ]
+  },
+  "authors": [
+    {
+      "name": "Ajay Vasant",
+      "image": "https://drive.google.com/file/d/1Pgj-tshLgNfFwvHP-uBWuTLFVeANirFB/view?usp=drivesdk",
+      "bio": "I am a Cloud Computing enthusiast working as Cloud Support Engineer at Amazon Web Services.",
+      "linkedin": "https://www.linkedin.com/in/ajay-vasant-545155ab",
+    }
+  ]
+}

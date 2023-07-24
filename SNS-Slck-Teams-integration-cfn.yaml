@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS CloudFormation template for integrating SNS with Slack and Team channels
+
+Resources:
+  SlackTeamsIntegrationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: SlackTeamsIntegrationTopic
+  
+  SNSToLambdaSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SlackTeamsIntegrationTopic
+      Protocol: lambda
+      Endpoint: !GetAtt SlackTeamsIntegrationLambda.Arn
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+      Policies:
+        - PolicyName: LambdaExecutionRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  SlackTeamsIntegrationLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: SlackTeamsIntegrationLambda
+      Runtime: python3.8 #can update as per your usecase
+      Timeout: 30 #set the function timeout
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import urllib3
+          import json
+
+          http = urllib3.PoolManager()
+
+
+          def lambda_handler(event, context):
+
+            #when using slack
+            url = 'https://hooks.slack.com/services/xxxxxxx'
+            msg = {
+                'channel': '#CHANNEL_NAME',
+                'text': event['Records'][0]['Sns']['Message'],
+                'icon_emoji': '',
+                }
+                
+            #when using teams
+            #url = "https://outlook.office.com/webhook/xxxxxxx"
+            #msg = {"text": event["Records"][0]["Sns"]["Message"]}
+
+            encoded_msg = json.dumps(msg).encode('utf-8')
+            resp = http.request('POST', url, body=encoded_msg)
+            print({
+                "message": event["Records"][0]["Sns"]["Message"],
+                "status_code": resp.status,
+                "response": resp.data,
+                })
+
+  SNSToLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+     FunctionName: !GetAtt SlackTeamsIntegrationLambda.Arn
+     Action: lambda:InvokeFunction
+     Principal: sns.amazonaws.com
+     SourceArn: !Ref SlackTeamsIntegrationTopic
+
+Outputs:
+  SNSTopicName:
+    Description: The ARN of the created SNS topic
+    Value: !Ref SlackTeamsIntegrationTopic
+
+  LambdaFunctionName:
+    Description: The ARN of the created Lambda function
+    Value: !GetAtt SlackTeamsIntegrationLambda.Arn
+
+  LambdaExecutionRoleARN:
+    Description: The ARN of the SNStoLambda IAM Role
+    Value: !GetAtt LambdaExecutionRole.Arn
