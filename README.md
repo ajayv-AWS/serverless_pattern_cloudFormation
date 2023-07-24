@@ -1,0 +1,1 @@
+# serverless_pattern_cloudFormation
